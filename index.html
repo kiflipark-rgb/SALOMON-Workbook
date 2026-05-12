@@ -1602,6 +1602,10 @@ function colorNameToHex(name) {
 // ============ PRODUCT DETAIL ============
 function openProduct(id) {
   const p = PRODUCTS.find(x => x.id === id);
+  if (state.currentProduct && state.currentProduct.id !== id) {
+    if (!state.productHistory) state.productHistory = [];
+    state.productHistory.push(state.currentProduct.id);
+  }
   state.currentProduct = p;
   state.current = {
     ratings: {},
@@ -2860,6 +2864,15 @@ function openItemList(catId, itemName) {
 // Override goToList to go back to item list
 var _origGoToList = typeof goToList === 'function' ? goToList : null;
 function goToListFromDetail() {
+  if (state.productHistory && state.productHistory.length > 0) {
+    const prevId = state.productHistory.pop();
+    const prevProduct = PRODUCTS.find(x => x.id === prevId);
+    if (prevProduct) {
+      state.currentProduct = prevProduct;
+      openProduct(prevId);
+      return;
+    }
+  }
   if (state.staffFilter) {
     openStaffList(state.staffFilter.role, state.staffFilter.name);
   } else if (state.currentItemName) {
